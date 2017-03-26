@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
@@ -13,7 +16,7 @@ namespace Rei
         public MainWindow()
         {
             InitializeComponent();
-            BufferBox.Text = System.Text.Encoding.Default.GetString(Properties.Resources.README);
+            BufferBox.Text = Encoding.Default.GetString(Properties.Resources.README);
             BufferBox.Focus();
             DataContext = this;
             ResizeMode = ResizeMode == ResizeMode.NoResize ? ResizeMode.CanResize : ResizeMode.NoResize;
@@ -38,45 +41,133 @@ namespace Rei
             private set { FileBlock.Text = value; }
         }
 
+        public ICommand ExecuteCommandCommand => new Command<string>(ExecuteCommand);
+
         internal void ExecuteCommand(string cmd)
         {
-            switch (cmd[0])
+            try
             {
-                case '<':
-                    if (BufferBox.SelectedText == "")
-                    {
-                        var args = cmd.Substring(1).Split(' ');
-                        if (args.Length == 1)
-                            if (args[0] == "" && CurrentFile != "")
+                switch (cmd[0])
+                {
+                    case '<':
+                        if (BufferBox.SelectedText == "")
+                        {
+                            var args = cmd.Substring(1).Split(' ');
+                            if (args.Length == 1)
                             {
-                                BufferBox.Text = File.ReadAllText(CurrentFile);
-                            }
-                            else
-                            {
-                                var path = Path.GetFullPath(Environment.ExpandEnvironmentVariables(args[0]));
-                                BufferBox.Text = File.ReadAllText(path);
-                                CurrentFile = path;
-                            }
-                    }
-                    break;
-                case '>':
-                    if (BufferBox.SelectedText == "")
-                    {
-                        var args = cmd.Substring(1).Split(' ');
-                        if (args.Length == 1)
-                            if (args[0] == "" && CurrentFile != "")
-                            {
-                                File.WriteAllText(CurrentFile, BufferBox.Text);
-                            }
-                            else
-                            {
-                                var path = Path.GetFullPath(Environment.ExpandEnvironmentVariables(args[0]));
-                                File.WriteAllText(path, BufferBox.Text);
-                                if (CurrentFile != path)
+                                if (args[0] == "" && CurrentFile != "")
+                                {
+                                    BufferBox.Text = File.ReadAllText(CurrentFile);
+                                }
+                                else
+                                {
+                                    var path = Path.GetFullPath(Environment.ExpandEnvironmentVariables(args[0]));
+                                    BufferBox.Text = File.ReadAllText(path);
                                     CurrentFile = path;
+                                }
                             }
+                            else if (args.Length > 1)
+                            {
+                                var arguments = args.Skip(1).Aggregate("", (s, a) => s + a + " ");
+                                var psi = new ProcessStartInfo
+                                {
+                                    FileName = args[0],
+                                    Arguments = arguments,
+                                    RedirectStandardOutput = true,
+                                    RedirectStandardError = true,
+                                    UseShellExecute = false,
+                                    CreateNoWindow = true
+                                };
+                                using (var process = Process.Start(psi))
+                                {
+                                    process?.StandardOutput.ReadToEndAsync()
+                                        .ContinueWith(
+                                            r => Application.Current.Dispatcher.Invoke(() => BufferBox.Text = r.Result));
+                                }
+                            }
+                        }
+                        break;
+                    case '>':
+                        if (BufferBox.SelectedText == "")
+                        {
+                            var args = cmd.Substring(1).Split(' ');
+                            if (args.Length == 1)
+                            {
+                                if (args[0] == "" && CurrentFile != "")
+                                {
+                                    File.WriteAllText(CurrentFile, BufferBox.Text);
+                                }
+                                else
+                                {
+                                    var path = Path.GetFullPath(Environment.ExpandEnvironmentVariables(args[0]));
+                                    File.WriteAllText(path, BufferBox.Text);
+                                    if (CurrentFile != path)
+                                    {
+                                        CurrentFile = path;
+                                    }
+                                }
+                            }
+                            else if (args.Length > 1)
+                            {
+                                var arguments = args.Skip(1).Aggregate("", (s, a) => s + a + " ");
+                                var psi = new ProcessStartInfo
+                                {
+                                    FileName = args[0],
+                                    Arguments = arguments,
+                                    RedirectStandardInput = true,
+                                    RedirectStandardOutput = true,
+                                    RedirectStandardError = true,
+                                    UseShellExecute = false,
+                                    CreateNoWindow = true
+                                };
+                                using (var process = Process.Start(psi))
+                                {
+                                    process?.StandardInput.Write(BufferBox.Text);
+                                }
+                            }
+                        }
+                        break;
+                    case '|':
+                        if (BufferBox.SelectedText == "")
+                        {
+                            var args = cmd.Substring(1).Split(' ');
+                            var arguments = args.Skip(1).Aggregate("", (s, a) => s + a + " ");
+                            var psi = new ProcessStartInfo
+                            {
+                                FileName = args[0],
+                                Arguments = arguments,
+                                RedirectStandardInput = true,
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            };
+                            using (var process = Process.Start(psi))
+                            {
+                                process?.StandardInput.Write(BufferBox.Text);
+                                process?.StandardOutput.ReadToEndAsync()
+                                    .ContinueWith(
+                                        r => Application.Current.Dispatcher.Invoke(() => BufferBox.Text = r.Result));
+                            }
+                        }
+                        break;
+                    case '!':
+                    {
+                        var args = cmd.Substring(1).Split(' ');
+                        var arguments = args.Aggregate("", (s, a) => s + a + " ");
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = "cmd",
+                            Arguments = $"/c \"{arguments} && PAUSE\""
+                        };
+                        Process.Start(psi);
+                        break;
                     }
-                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.Write(ex.Message);
             }
         }
 
@@ -98,10 +189,10 @@ namespace Rei
         private void MainWindow_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Middle)
+            {
                 SwitchWindowChrome();
+            }
         }
-
-        public ICommand ExecuteCommandCommand => new Command<string>(ExecuteCommand);
 
         public void SwitchWindowState()
         {
