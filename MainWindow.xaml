@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:akira="clr-namespace:Rei"
+        xmlns:rei="clr-namespace:Rei"
         mc:Ignorable="d"
         Width="800"
         Height="600"
-        Title="{x:Static akira:Config.ApplicationName}"
-        Background="{x:Static akira:Config.Background}"
-        Foreground="{x:Static akira:Config.Foreground}"
+        Title="{x:Static rei:Config.ApplicationName}"
+        Background="{x:Static rei:Config.Background}"
+        Foreground="{x:Static rei:Config.Foreground}"
         ResizeMode="CanResize"
         MouseDown="MainWindow_OnMouseRightButtonDown">
     <Grid Margin="1">
@@ -18,59 +18,71 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <DockPanel Margin="0,0,0,1" Background="{x:Static akira:Config.LineBackground}" HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60*" />
+            <ColumnDefinition Width="40*" />
+        </Grid.ColumnDefinitions>
+        <DockPanel Margin="0,0,0,1" Background="{x:Static rei:Config.LineBackground}" HorizontalAlignment="Stretch"
+                   Grid.ColumnSpan="2">
             <TextBlock Name="FileBlock"
                        DockPanel.Dock="Left"
-                       FontFamily="{x:Static akira:Config.FontFamily}"
-                       Foreground="{x:Static akira:Config.LineForeground}"
+                       FontFamily="{x:Static rei:Config.FontFamily}"
+                       Foreground="{x:Static rei:Config.LineForeground}"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Stretch"
                        FontSize="10" />
             <TextBlock Name="LineBlock"
                        DockPanel.Dock="Right"
                        Text="1"
-                       FontFamily="{x:Static akira:Config.FontFamily}"
-                       Foreground="{x:Static akira:Config.LineForeground}"
+                       FontFamily="{x:Static rei:Config.FontFamily}"
+                       Foreground="{x:Static rei:Config.LineForeground}"
                        VerticalAlignment="Center"
                        TextAlignment="Right"
                        FontSize="10" />
         </DockPanel>
-        <TextBox Margin="0,0,0,1" Name="BufferBox" 
+        <TextBox Margin="0,0,0,1" Name="BufferBox"
                  IsReadOnly="False"
                  TextWrapping="Wrap"
                  AcceptsReturn="True"
                  HorizontalScrollBarVisibility="Disabled"
                  VerticalScrollBarVisibility="Auto"
                  AcceptsTab="True"
-                 Foreground="{x:Static akira:Config.BufferForeground}"
-                 Background="{x:Static akira:Config.BufferBackground}"
+                 Foreground="{x:Static rei:Config.BufferForeground}"
+                 Background="{x:Static rei:Config.BufferBackground}"
                  FontSize="14"
                  BorderThickness="0"
                  TextBlock.LineHeight="20"
                  TextBlock.LineStackingStrategy="BlockLineHeight"
                  Grid.Row="1"
-                 FontFamily="{x:Static akira:Config.FontFamily}"
+                 FontFamily="{x:Static rei:Config.FontFamily}"
                  Grid.Column="0"
                  PreviewKeyUp="BufferBoxPreviewKeyUp" />
+        <TextBlock Margin="1,0,0,1" Name="OutputBox"
+                   TextWrapping="Wrap"
+                   Foreground="{x:Static rei:Config.OutputForeground}"
+                   Background="{x:Static rei:Config.OutputBackground}"
+                   FontSize="12"
+                   LineHeight="16"
+                   LineStackingStrategy="BlockLineHeight"
+                   Grid.Row="1"
+                   FontFamily="{x:Static rei:Config.FontFamily}"
+                   Grid.Column="1" />
         <TextBox Name="CommandBox"
                  IsReadOnly="False"
                  TextWrapping="NoWrap"
                  HorizontalScrollBarVisibility="Disabled"
                  VerticalScrollBarVisibility="Disabled"
-                 Foreground="{x:Static akira:Config.CommandForeground}"
-                 Background="{x:Static akira:Config.CommandBackground}"
+                 Foreground="{x:Static rei:Config.CommandForeground}"
+                 Background="{x:Static rei:Config.CommandBackground}"
                  FontSize="14"
                  Padding="3"
                  GotKeyboardFocus="CommandBox_OnGotKeyboardFocus"
+                 PreviewKeyDown="CommandBox_OnPreviewKeyDown"
                  BorderThickness="0"
                  TextBlock.LineHeight="20"
                  TextBlock.LineStackingStrategy="BlockLineHeight"
                  Grid.Row="2"
-                 FontFamily="{x:Static akira:Config.FontFamily}"
-                 Grid.Column="0">
-            <TextBox.InputBindings>
-                <KeyBinding Key="Return" Command="{Binding ExecuteCommandCommand}" CommandParameter="{Binding Text, ElementName=CommandBox}"/>
-            </TextBox.InputBindings>
-            </TextBox>
+                 FontFamily="{x:Static rei:Config.FontFamily}"
+                 Grid.Column="0" Grid.ColumnSpan="2" />
     </Grid>
 </Window>

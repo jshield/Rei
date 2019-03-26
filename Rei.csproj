@@ -13,6 +13,7 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -54,9 +55,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CommandExtensions.cs" />
+    <Compile Include="CommandInfo.cs" />
     <Compile Include="HotKey.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="IBuffer.cs" />
+    <Compile Include="PipeDirection.cs" />
     <Compile Include="SolarizedColor.cs" />
+    <Compile Include="BufferExtensions.cs" />
+    <Compile Include="SolidColorBrushExtensions.cs" />
+    <Compile Include="TextBoxBuffer.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

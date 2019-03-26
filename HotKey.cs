@@ -36,8 +36,15 @@ namespace Rei
             return !left.Equals(right);
         }
 
-        public ModifierKeys ModifierKeys;
-        public Key Key;
-        public string Command;
+        public readonly ModifierKeys ModifierKeys;
+        public readonly Key Key;
+        public readonly string Command;
+
+        public HotKey(ModifierKeys modifierKeys, Key key, string command)
+        {
+            ModifierKeys = modifierKeys;
+            Key = key;
+            Command = command;
+        }
     }
 }
